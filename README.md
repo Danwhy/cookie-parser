@@ -1,78 +1,49 @@
-# cookie-parser
+## About Cookies
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+Cookies are data, stored in small text files, on your computer. When a web server has sent a web page to a browser, the connection is shut down, and the server forgets everything about the user. Cookies were invented to solve the problem "how to remember information about the user". Cookies are contained in the HTTP request header.
 
-Parse `Cookie` header and populate `req.cookies` with an object keyed by the cookie
-names. Optionally you may enable signed cookie support by passing a `secret` string,
-which assigns `req.secret` so it may be used by other middleware.
+### What's inside a cookie?
 
-## Installation
+Cookies are saved in name-value pairs like:
+"username=John Doe;
+creationdate=10/01/2015;
+expirydate=sessionend;
+sessionid=13425657;
+secure=true;
+host=github.com;
+value=hello.9428u24891928u3"
 
-```sh
-$ npm install cookie-parser
-```
+### Signed Cookies
 
-## API
+Cookies can be "signed" to detect if the client has modified the cookie. It works by taking the value of the current cookie and a secret key, and base64 encoding them. When the cookie gets read, the server recalculates the signature and makes sure that it matches the signature attached to it.
 
-```js
-var express      = require('express')
-var cookieParser = require('cookie-parser')
+If it does not match, then it will return false.
 
-var app = express()
-app.use(cookieParser())
-```
+### JSON Cookies
 
-### cookieParser(secret, options)
+Cookies can come stored in various ways, but JSON format is often used. 
 
-- `secret` a string used for signing cookies. This is optional and if not specified, will not parse signed cookies.
-- `options` an object that is passed to `cookie.parse` as the second option. See [cookie](https://www.npmjs.org/package/cookie) for more information.
-  - `decode` a function to decode the value of the cookie
+## What is cookie-parser?
 
-### cookieParser.JSONCookie(str)
+Cookie-parser takes various types of cookies (signed or unsigned, JSON or string) and converts them into an unsigned object that can be accessed more easily.
 
-Parse a cookie value as a JSON cookie. This will return the parsed JSON value if it was a JSON cookie, otherwise it will return the passed value.
+JSON cookies are converted to an object. If the cookies are signed, cookie-parser removes the signature before returning the object. If they are already unsigned and given in string format, it simply returns the value as an object.
 
-### cookieParser.JSONCookies(cookies)
+eg. cookies in the format **"Cho=Kim;Greet=Hello"** are returned as **{ Cho: 'Kim', Greet: 'Hello' }**
 
-Given an object, this will iterate over the keys and call `JSONCookie` on each value. This will return the same object passed in.
+### Dependencies
 
-### cookieParser.signedCookie(str, secret)
+This library relies on two other npm modules: **cookie** and **cookie-signature**.
 
-Parse a cookie value as a signed cookie. This will return the parsed unsigned value if it was a signed cookie and the signature was valid, otherwise it will return the passed value.
+Cookie is a basic cookie parser and serialiser: a way to read and write HTTP cookie headers.
 
-### cookieParser.signedCookies(cookies, secret)
+Cookie-signature provides the functions to sign and unsign cookies. 
 
-Given an object, this will iterate over the keys and check if any value is a signed cookie. If it is a signed cookie and the signature is valid, the key will be deleted from the object and added to the new object that is returned.
+## Limitations
 
-## Example
+* This library must be used on top of Express.js, so is not versatile for other node users.
+* Cookie-parser does not provide functionality for decryting the cookies themselves.
 
-```js
-var express      = require('express')
-var cookieParser = require('cookie-parser')
+### What is this library useful for?
 
-var app = express()
-app.use(cookieParser())
-
-app.get('/', function(req, res) {
-  console.log("Cookies: ", req.cookies)
-})
-
-app.listen(8080)
-
-// curl command that sends an HTTP request with two cookies
-// curl http://127.0.0.1:8080 --cookie "Cho=Kim;Greet=Hello"
-```
-
-### [MIT Licensed](LICENSE)
-
-[npm-image]: https://img.shields.io/npm/v/cookie-parser.svg
-[npm-url]: https://npmjs.org/package/cookie-parser
-[travis-image]: https://img.shields.io/travis/expressjs/cookie-parser/master.svg
-[travis-url]: https://travis-ci.org/expressjs/cookie-parser
-[coveralls-image]: https://img.shields.io/coveralls/expressjs/cookie-parser/master.svg
-[coveralls-url]: https://coveralls.io/r/expressjs/cookie-parser?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/cookie-parser.svg
-[downloads-url]: https://npmjs.org/package/cookie-parser
+Cookie-parser is great for reading already-existing cookies and making them usable by the server. However this library does not give functionality for writing cookies.
